@@ -20,8 +20,9 @@ An interactive web application that visualizes the forward propagation of a neur
 
 ### Installation
 
-1. Clone the repository
-2. Install dependencies:
+1. Clone the repository: git clone https://github.com/serge926/neural-network-visualizer.git
+2. Navigate to directory: cd neural-network-visualizer
+3. Install dependencies
    ```bash
    npm install
    ```
