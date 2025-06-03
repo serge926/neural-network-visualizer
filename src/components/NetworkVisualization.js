@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 
-const NetworkVisualization = ({ inputs, hiddenActivations, output, showAnimation, onAnimationEnd, weights }) => {
+const NetworkVisualization = ({ inputs = {}, hiddenActivations = {}, output = 0, showAnimation = false, onAnimationEnd, weights = {} }) => {
   // Enhanced neural network structure
   const layers = [
     { id: 'input', nodes: 10, label: 'Input Layer', color: '#4CAF50' },
@@ -24,7 +24,7 @@ const NetworkVisualization = ({ inputs, hiddenActivations, output, showAnimation
     }));
   }).flat();
 
-  // Get weights from props
+  // Get weights from props with default values
   const weightMatrices = {
     inputToHidden1: weights?.inputToHidden1?.arraySync() || Array(10).fill(Array(6).fill(0)),
     hidden1ToHidden2: weights?.hidden1ToHidden2?.arraySync() || Array(6).fill(Array(6).fill(0)),
@@ -37,7 +37,7 @@ const NetworkVisualization = ({ inputs, hiddenActivations, output, showAnimation
   const connections = [];
 
   // Get input values with default values
-  const inputValues = Object.values(inputs) || Array(10).fill(0);
+  const inputValues = Object.values(inputs || {});
   
   // Get hidden activations with default values
   const hiddenActivationsArrays = {
@@ -58,12 +58,12 @@ const NetworkVisualization = ({ inputs, hiddenActivations, output, showAnimation
     
     for (let j = 0; j < fromLayer.nodes; j++) {
       for (let k = 0; k < toLayer.nodes; k++) {
-        const weight = weightMatrix[j][k];
-        const value = i === 0 ? inputValues[j] * weight :
-                      i === 1 ? hiddenActivationsArrays.hidden1[k] * weight :
-                      i === 2 ? hiddenActivationsArrays.hidden2[k] * weight :
-                      i === 3 ? hiddenActivationsArrays.hidden3[k] * weight :
-                      hiddenActivationsArrays.hidden4[k] * weight;
+        const weight = weightMatrix[j]?.[k] || 0;
+        const value = i === 0 ? (inputValues[j] || 0) * weight :
+                      i === 1 ? (hiddenActivationsArrays.hidden1[j] || 0) * weight :
+                      i === 2 ? (hiddenActivationsArrays.hidden2[j] || 0) * weight :
+                      i === 3 ? (hiddenActivationsArrays.hidden3[j] || 0) * weight :
+                      (hiddenActivationsArrays.hidden4[j] || 0) * weight;
         
         connections.push({
           from: `${fromLayer.id}-${j}`,
@@ -78,7 +78,7 @@ const NetworkVisualization = ({ inputs, hiddenActivations, output, showAnimation
 
   // Node activation values with default values
   const nodeValues = {
-    input: Object.values(inputs),
+    input: Object.values(inputs || {}),
     hidden1: hiddenActivations?.hidden1 || Array(6).fill(0),
     hidden2: hiddenActivations?.hidden2 || Array(6).fill(0),
     hidden3: hiddenActivations?.hidden3 || Array(6).fill(0),
@@ -179,7 +179,7 @@ const NetworkVisualization = ({ inputs, hiddenActivations, output, showAnimation
                 strokeWidth="3"
               >
                 <title>
-                  {node.layer === 'input' && Object.keys(inputs)[node.id.split('-')[1]]}
+                  {node.layer === 'input' && Object.keys(inputs || {})[node.id.split('-')[1]]}
                 </title>
               </circle>
               {node.layer === 'input' && (
@@ -190,7 +190,7 @@ const NetworkVisualization = ({ inputs, hiddenActivations, output, showAnimation
                   fontSize="12"
                   textAnchor="middle"
                 >
-                  {Object.keys(inputs)[node.id.split('-')[1]]}
+                  {Object.keys(inputs || {})[node.id.split('-')[1]]}
                 </text>
               )}
             </motion.g>

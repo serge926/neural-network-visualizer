@@ -61,6 +61,21 @@ const WEIGHTS = {
   ], [6, 1])
 };
 
+// Input ranges for validation
+const INPUT_RANGES = {
+  temperatureChange: { min: -2, max: 4 },
+  precipitationChange: { min: -30, max: 30 },
+  co2Levels: { min: 400, max: 800 },
+  oceanAcidification: { min: -0.5, max: 1.0 },
+  seaLevelRise: { min: -0.5, max: 1.0 },
+  forestCover: { min: 0, max: 100 },
+  agriculturalLand: { min: 0, max: 100 },
+  urbanExpansion: { min: 0, max: 100 },
+  pollutionIndex: { min: -0.5, max: 1.0 },
+  habitatFragmentation: { min: -0.5, max: 1.0 },
+  invasiveSpecies: { min: 0, max: 1.0 }
+};
+
 function App() {
   const [inputs, setInputs] = useState({
     temperatureChange: 0,
@@ -154,13 +169,13 @@ function App() {
 
       // Generate explanation
       const explanation = generateExplanation(
-      inputs,
-      hidden1Activation.dataSync(),
-      hidden2Activation.dataSync(),
-      hidden3Activation.dataSync(),
-      hidden4Activation.dataSync(),
-      outputValue
-    );
+        inputs,
+        hidden1Activation.dataSync(),
+        hidden2Activation.dataSync(),
+        hidden3Activation.dataSync(),
+        hidden4Activation.dataSync(),
+        outputValue
+      );
       setExplanation(explanation);
 
       // Trigger animation
@@ -182,9 +197,13 @@ function App() {
       setTimeout(() => setShowAnimation(false), 1000);
     } catch (error) {
       console.error('Error in forward propagation:', error);
-      // Set default values on error
-      setHiddenActivations({ hidden: Array(6).fill(0) });
-      setHiddenActivations({ hidden: Array(5).fill(0) });
+      // Set default values on error with correct structure
+      setHiddenActivations({
+        hidden1: Array(6).fill(0),
+        hidden2: Array(6).fill(0),
+        hidden3: Array(6).fill(0),
+        hidden4: Array(6).fill(0)
+      });
       setOutput(0);
       setExplanation('Error occurred during calculation');
     }
@@ -216,14 +235,12 @@ function App() {
     return explanations.join('\n');
   };
 
-  // Handle input changes
+  // Handle input changes with proper range validation
   const handleInputChange = (field, value) => {
-    const newValue = {
-      temperatureChange: Math.min(4, Math.max(-2, value)),
-      precipitationChange: Math.min(30, Math.max(-30, value)),
-      co2Levels: Math.min(800, Math.max(400, value))
-    }[field];
-    
+    const range = INPUT_RANGES[field];
+    if (!range) return;
+
+    const newValue = Math.min(range.max, Math.max(range.min, value));
     setInputs(prev => ({
       ...prev,
       [field]: newValue
@@ -232,7 +249,11 @@ function App() {
 
   // Handle preset scenarios
   const handlePreset = (scenario) => {
-    setInputs(presets[scenario]);
+    const preset = presets[scenario] || {};
+    setInputs(prev => ({
+      ...prev,
+      ...preset
+    }));
   };
 
   // Run simulation

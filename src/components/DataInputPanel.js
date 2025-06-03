@@ -11,7 +11,7 @@ import {
   MenuItem
 } from '@mui/material';
 
-const DataInputPanel = ({ inputs, onChange, onPreset, onRun, presets }) => {
+const DataInputPanel = ({ inputs = {}, onChange, onPreset, onRun, presets }) => {
   const inputRanges = {
     temperatureChange: { 
       min: -2, 
@@ -81,7 +81,7 @@ const DataInputPanel = ({ inputs, onChange, onPreset, onRun, presets }) => {
     }
   };
 
-  const formatLabel = (field, value) => {
+  const formatLabel = (field) => {
     const range = inputRanges[field];
     return `${field} (${range.min}${range.unit} to ${range.max}${range.unit})`;
   };
@@ -101,7 +101,7 @@ const DataInputPanel = ({ inputs, onChange, onPreset, onRun, presets }) => {
         <InputLabel sx={{ color: '#1976d2' }}>Preset Scenarios</InputLabel>
         <Select
           label="Preset Scenarios"
-          onChange={(e) => onPreset(e.target.value)}
+          onChange={(e) => onPreset?.(e.target.value)}
           sx={{
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
@@ -114,7 +114,7 @@ const DataInputPanel = ({ inputs, onChange, onPreset, onRun, presets }) => {
           }}
         >
           <MenuItem value="" sx={{ color: '#666' }}>None</MenuItem>
-          {Object.keys(presets).map(scenario => (
+          {Object.keys(presets || {}).map(scenario => (
             <MenuItem 
               key={scenario} 
               value={scenario}
@@ -131,16 +131,16 @@ const DataInputPanel = ({ inputs, onChange, onPreset, onRun, presets }) => {
       </FormControl>
 
       <Grid container spacing={3}>
-        {Object.entries(inputs).map(([field, value]) => {
+        {Object.entries(inputs || {}).map(([field, value]) => {
           const range = inputRanges[field];
           return (
             <Grid item xs={12} key={field}>
               <TextField
                 fullWidth
-                label={formatLabel(field, value)}
+                label={formatLabel(field)}
                 type="number"
                 value={value}
-                onChange={(e) => onChange(field, Number(e.target.value))}
+                onChange={(e) => onChange?.(field, Number(e.target.value))}
                 InputProps={{
                   inputProps: { min: range.min, max: range.max }
                 }}
